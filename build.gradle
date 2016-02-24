@@ -1,0 +1,18 @@
+group 'sima'
+version '0.1-alpha'
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'sima.sync.server.DebugNetwork'
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
