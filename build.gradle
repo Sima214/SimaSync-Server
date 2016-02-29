@@ -9,7 +9,7 @@ repositories {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'sima.sync.server.DebugNetwork'
+        attributes 'Main-Class': 'sima/sync/server/swing/Main'
     }
 }
 

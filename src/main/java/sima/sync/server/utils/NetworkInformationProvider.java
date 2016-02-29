@@ -1,4 +1,4 @@
-package sima.sync.server;
+package sima.sync.server.utils;
 
 import java.io.PrintStream;
 import java.net.InetAddress;
@@ -11,14 +11,15 @@ import java.util.Enumeration;
 /**
  * Used to get information about the network interfaces on the current computer.
  */
-public class DebugNetwork {
-    public static void main(String args[]) throws SocketException {
+public class NetworkInformationProvider {//TODO make this class more generic
+
+    public static void printInfo() throws SocketException {
         Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
         for (NetworkInterface netint : Collections.list(nets))
             displayInterfaceInformation(netint);
     }
 
-    static void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
+    private static void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
         PrintStream out = System.out;
         out.printf("Display name: %s\n", netint.getDisplayName());
         out.printf("Name: %s\n", netint.getName());
