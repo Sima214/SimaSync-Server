@@ -1,0 +1,3 @@
+#  Intended way to launch the application.
+#  At the time of writing this file, I don't provide WINDOWS support, but it is scheduled for the future.
+./bin/SimaSync-Server
