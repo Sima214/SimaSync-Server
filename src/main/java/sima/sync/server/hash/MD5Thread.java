@@ -1,6 +1,8 @@
 package sima.sync.server.hash;
 
 
+import sima.sync.server.Constants;
+
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,6 +15,8 @@ public class MD5Thread extends Thread {
         super("HashCalculator #" + threadIndex);
         setDaemon(true);
         this.queue = queue;
+        Constants.log.trace("Starting thread named: " + getName());
+        start();
     }
 
     @SuppressWarnings("InfiniteLoopStatement")

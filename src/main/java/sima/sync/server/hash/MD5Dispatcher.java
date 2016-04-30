@@ -12,9 +12,7 @@ public class MD5Dispatcher {
 
     public static void init() {
         for (int i = 0; i < Constants.logicalCores; i++) {
-            MD5Thread cur = new MD5Thread(i, queue);
-            cur.start();
-            threads[i] = cur;
+            threads[i] = new MD5Thread(i, queue);
         }
     }
 }

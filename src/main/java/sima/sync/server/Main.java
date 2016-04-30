@@ -54,7 +54,6 @@ public class Main {
         //And finally create the gui.
         Constants.log.info("Initializing the gui...");
         SwingUtilities.invokeLater(Constants.SCREEN_BUILDER);
-        Constants.log.info("Load complete.");
     }
 
 }
