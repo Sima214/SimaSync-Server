@@ -11,6 +11,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import sima.sync.server.hash.MD5Dispatcher;
 
 import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -56,4 +57,21 @@ public class Main {
         SwingUtilities.invokeLater(Constants.SCREEN_BUILDER);
     }
 
+    public static void exit(int code) {
+        if (code == 0) {
+            Constants.log.info("Exiting application...");
+        } else {
+            Constants.log.fatal("A fatal error has occured and the application must exit.");
+        }
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                //Close gui
+                JFrame frame = Constants.SCREEN_BUILDER.mainFrame;
+                frame.setVisible(false);
+                frame.dispose();});
+        } catch (InterruptedException | InvocationTargetException e) {
+            System.exit(code);//We can't do anything at that point so just exit the damn JVM.
+        }
+
+    }
 }

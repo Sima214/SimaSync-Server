@@ -4,7 +4,7 @@ apply plugin: 'java'
 apply plugin: 'distribution'
 apply plugin: 'application'
 //Load configuration from properties file
-file 'build.properties' withReader{
+file 'build.properties' withReader {
     println("Loading properties from file...")
     def pr = new Properties()
     pr.load(it)
@@ -12,9 +12,11 @@ file 'build.properties' withReader{
 }
 version = config.version
 mainClassName = 'sima/sync/server/Main'
-applicationDefaultJvmArgs = ["-Xms$config.minHeap", "-Xmx$config.maxHeap", "-XX:MaxMetaspaceSize=$config.metaspace", "-XX:CompressedClassSpaceSize=$config.metaspace", "-Dswing.defaultlaf=$config.defLAF"]
-distributions{
-    main{
+applicationDefaultJvmArgs = ["-Xms$config.minHeap", "-Xmx$config.maxHeap", "-XX:MaxMetaspaceSize=$config.metaspace", "-XX:CompressedClassSpaceSize=$config.metaspace",
+                             "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=50", "-XX:InitiatingHeapOccupancyPercent=25", "-verbose:gc",
+                             "-XX:+AggressiveOpts", "-XX:+UseCompressedOops", "-Dswing.defaultlaf=$config.defLAF"]
+distributions {
+    main {
         baseName = 'SimaSync-Server'
     }
 }
