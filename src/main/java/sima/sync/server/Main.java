@@ -11,7 +11,6 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import sima.sync.server.hash.MD5Dispatcher;
 
 import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -50,28 +49,24 @@ public class Main {
             Configurator.initialize(builder.build());
         }
         //Then initialize all required classes
-        Constants.log.info("Initializing all required components...");
+        Instance.log.info("Initializing all required components...");
         MD5Dispatcher.init();
         //And finally create the gui.
-        Constants.log.info("Initializing the gui...");
-        SwingUtilities.invokeLater(Constants.SCREEN_BUILDER);
+        Instance.log.info("Initializing the gui...");
+        SwingUtilities.invokeLater(Instance.screen);
     }
 
     public static void exit(int code) {
         if (code == 0) {
-            Constants.log.info("Exiting application...");
+            Instance.log.info("Exiting application...");
         } else {
-            Constants.log.fatal("A fatal error has occured and the application must exit.");
+            Instance.log.fatal("A fatal error has occured and the application must exit.");
         }
-        try {
-            SwingUtilities.invokeAndWait(() -> {
-                //Close gui
-                JFrame frame = Constants.SCREEN_BUILDER.mainFrame;
-                frame.setVisible(false);
-                frame.dispose();});
-        } catch (InterruptedException | InvocationTargetException e) {
-            System.exit(code);//We can't do anything at that point so just exit the damn JVM.
-        }
-
+        SwingUtilities.invokeLater(() -> {//Close gui from the swing event dispatch thread.
+            JFrame frame = Instance.screen.mainFrame;
+            frame.setVisible(false);
+            frame.dispose();
+        });
     }
+
 }

@@ -1,10 +1,13 @@
 package sima.sync.server.swing;
 
 import sima.sync.server.Constants;
+import sima.sync.server.Instance;
 import sima.sync.server.Main;
+import sima.sync.server.allocation.DownloadElement;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -15,8 +18,13 @@ import java.awt.event.WindowEvent;
 public class MainScreenBuilder implements Runnable {
     public JFrame mainFrame;
     private MainListener mainListener = new MainListener();
-    public JLabel statusVersion;
-    public JLabel statusConnection;
+    public JLabel connection;
+    public JLabel packetSecond;
+    public JLabel upRate;
+    public JLabel downRate;
+    public JLabel fileBacklog;
+    public JLabel threadState[] = new JLabel[Constants.LOGICAL_CORES];
+    public JLabel inBuffer;
 
     @Override
     public void run() {
@@ -25,7 +33,7 @@ public class MainScreenBuilder implements Runnable {
         Box statusBox = Box.createHorizontalBox();
         statusBox.setPreferredSize(new Dimension(380, 0));
         TitledBorder statusBoxBorder = new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Status Panel");
-        statusBoxBorder.setTitleFont(statusBoxBorder.getTitleFont().deriveFont(16f));
+        statusBoxBorder.setTitleFont(statusBoxBorder.getTitleFont().deriveFont(18.0f));
         statusBox.setBorder(statusBoxBorder);
         {//Fill up status panel
             Box column1 = Box.createVerticalBox();
@@ -33,20 +41,37 @@ public class MainScreenBuilder implements Runnable {
             Box column2 = Box.createVerticalBox();
             column2.setAlignmentY(Component.TOP_ALIGNMENT);
             //Version
-            statusVersion = new JLabel(Constants.VERSION);
-            createStatusRow(column1, column2, "Version", statusVersion);
+            createStatusRow(column1, column2, "Version", new JLabel(Constants.VERSION + ", " + Constants.DATA_PACKET_SIZE + " bytes per packet"));
             //Connection
-            statusConnection = new JLabel("This is getting somewhere...");
-            createStatusRow(column1, column2, "Connection Status", statusConnection);
+            connection = new JLabel("Initializing...");
+            createStatusRow(column1, column2, "Connection Status", connection);
+            //Packets/second
+            packetSecond = new JLabel("N/A p/s");
+            createStatusRow(column1, column2, "Data packet rate", packetSecond);
+            //Up rate
+            upRate = new JLabel("N/A kbyte/s");
+            createStatusRow(column1, column2, "Upload rate", upRate);
+            //Down rate
+            downRate = new JLabel("N/A kbytes");
+            createStatusRow(column1, column2, "Download rate", downRate);
+            //File backlog
+            fileBacklog = new JLabel("0 file(s) pending");
+            createStatusRow(column1, column2, "Files pending", fileBacklog);
+            //Hash threads state
+            for (int i = 0; i < Constants.LOGICAL_CORES; i++) {
+                threadState[i] = new JLabel("Sleeping...");
+                createStatusRow(column1, column2, "State of #" + i + " thread", threadState[i]);
+            }
+            //In buffer usage
+            inBuffer = new JLabel("0/0 kbytes (N/A %)");
+            createStatusRow(column1, column2, "In buffer usage", inBuffer);
             //Finally...
             statusBox.add(column1);
-            JSeparator separator = new JSeparator(SwingConstants.VERTICAL);
-            separator.setMaximumSize(new Dimension(5, Integer.MAX_VALUE));
-            statusBox.add(separator);
+            statusBox.add(Box.createRigidArea(new Dimension(2, 0)));
+            statusBox.add(new JSeparator(SwingConstants.VERTICAL));
+            statusBox.add(Box.createRigidArea(new Dimension(2, 0)));
             statusBox.add(column2);
         }
-        JPanel main = new JPanel(new BorderLayout());
-        //TODO List
         //Create and fill up the menu
         JMenuBar menuBar = new JMenuBar();
         {
@@ -170,10 +195,21 @@ public class MainScreenBuilder implements Runnable {
                 }
             }
         }
+        //Generate list
+        JList<DownloadElement> list = new JList<>(Instance.storage);
+        list.setCellRenderer(new DownloadListRenderer());
+        list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        list.setLayoutOrientation(JList.VERTICAL);
+        list.setVisibleRowCount(-1);
+        TitledBorder listBorder = new TitledBorder(new LineBorder(new Color(0xE0E0E0), 2, true), "Operations list");
+        listBorder.setTitleFont(listBorder.getTitleFont().deriveFont(20.0f));
+        list.setBorder(listBorder);
+        list.setOpaque(false);
+        JScrollPane scroll = new JScrollPane(list);
         //Add everything to the content pane.
         Container contentPane = mainFrame.getContentPane();
         contentPane.add(statusBox, BorderLayout.LINE_END);
-        contentPane.add(main, BorderLayout.CENTER);
+        contentPane.add(scroll, BorderLayout.CENTER);
         mainFrame.setJMenuBar(menuBar);
         mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         mainFrame.addWindowListener(new WindowAdapter() {
@@ -185,10 +221,10 @@ public class MainScreenBuilder implements Runnable {
         mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         mainFrame.pack();
         mainFrame.setVisible(true);//Must be last statement!
-        Constants.log.info("Gui completed (" + ((System.nanoTime() - startNano) / 1000000) + " milli secs)");
+        Instance.log.info("Gui completed (" + ((System.nanoTime() - startNano) / 1000000) + " milli secs)");
     }
 
-    private static final float FONT_SIZE = 13f;
+    private static final float FONT_SIZE = 15f;
     private static final Font STATUS_BOLD = UIManager.getFont("Label.font").deriveFont(Font.BOLD, FONT_SIZE);
     private static final Font STATUS_NORMAL = UIManager.getFont("Label.font").deriveFont(Font.PLAIN, FONT_SIZE);
 
