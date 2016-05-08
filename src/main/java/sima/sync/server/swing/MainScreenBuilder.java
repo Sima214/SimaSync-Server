@@ -197,7 +197,7 @@ public class MainScreenBuilder implements Runnable {
         }
         //Generate list
         JList<DownloadElement> list = new JList<>(Instance.storage);
-        list.setCellRenderer(new DownloadListRenderer());
+        list.setCellRenderer(new Renderer.DownloadListRenderer());
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setLayoutOrientation(JList.VERTICAL);
         list.setVisibleRowCount(-1);
