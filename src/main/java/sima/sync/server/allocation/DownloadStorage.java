@@ -1,7 +1,10 @@
 package sima.sync.server.allocation;
 
+import sima.sync.server.Instance;
+
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DownloadStorage extends AbstractListModel<DownloadElement> {
     private ArrayList<DownloadElement> data = new ArrayList<>();
@@ -29,13 +32,24 @@ public class DownloadStorage extends AbstractListModel<DownloadElement> {
         fireIntervalAdded(this, index, index);
     }
 
-    public synchronized void removeElement(int index) {
-        data.remove(index);
+    public synchronized void removeElement(int index, DownloadElement e) {
+        //Fail safe method, if the index cache becomes out of date.
+        if (data.get(index) == e) {
+            data.remove(index);
+        } else {
+            Instance.log.debug("Detected invalid index cache at removing element.");
+            data.remove(e);
+        }
         updateAllIndexes();
         fireIntervalRemoved(this, index, index);
     }
 
-    public void repaint(int index) {
+    public void repaint(int index, DownloadElement e) {
+        //Fail safe method, if the index cache becomes out of date.
+        if (data.get(index) != e) {
+            index = data.indexOf(e);
+            Instance.log.debug("Detected invalid index cache at repaint.");
+        }
         fireContentsChanged(this, index, index);
     }
 

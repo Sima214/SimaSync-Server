@@ -7,10 +7,13 @@ import sima.sync.server.swing.Renderer;
 import java.io.File;
 
 public class DownloadElement {
-    public enum Type {RECEIVE, SEND}
+    public enum Type {RECEIVE, SEND, BOTH}
+
+    public enum Status {PENDING, CONFIRMED}
 
     public final File file;
     public final Type type;
+    public Status status = Status.CONFIRMED;
     public int index;
     public float hashBar = 0.0f;
     public float syncBar = 0.0f;
@@ -24,11 +27,13 @@ public class DownloadElement {
         renderer = new Renderer(this);
         if (type == Type.SEND) {
             MD5Dispatcher.addToQueue(this);
+        } else {
+            status = Status.PENDING;
         }
     }
 
     public void repaint() {
-        Instance.storage.repaint(index);
+        Instance.storage.repaint(index, this);
     }
 
     public void deliverHash(byte[] digest) {

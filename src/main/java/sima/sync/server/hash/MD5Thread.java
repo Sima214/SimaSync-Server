@@ -2,7 +2,6 @@ package sima.sync.server.hash;
 
 
 import sima.sync.server.Instance;
-import sima.sync.server.Main;
 import sima.sync.server.allocation.DownloadElement;
 
 import javax.swing.*;
@@ -62,7 +61,7 @@ public class MD5Thread extends Thread {
             return MessageDigest.getInstance("md5");
         } catch (NoSuchAlgorithmException e) {
             Instance.log.fatal(e);
-            Main.exit(-1);
+            System.exit(-1);
             return null;
         }
     }

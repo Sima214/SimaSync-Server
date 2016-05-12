@@ -9,6 +9,7 @@ import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import sima.sync.server.hash.MD5Dispatcher;
+import sima.sync.server.settings.Settings;
 
 import javax.swing.*;
 import java.nio.file.Paths;
@@ -50,6 +51,7 @@ public class Main {
         }
         //Then initialize all required classes
         Instance.log.info("Initializing all required components...");
+        Instance.settings = Settings.init();
         MD5Dispatcher.init();
         //And finally create the gui.
         Instance.log.info("Initializing the gui...");
@@ -57,6 +59,7 @@ public class Main {
     }
 
     public static void exit(int code) {
+        Instance.settings.onShutdown();
         if (code == 0) {
             Instance.log.info("Exiting application...");
         } else {

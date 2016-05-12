@@ -17,7 +17,6 @@ import java.awt.event.WindowEvent;
 
 public class MainScreenBuilder implements Runnable {
     public JFrame mainFrame;
-    private MainListener mainListener = new MainListener();
     public JLabel connection;
     public JLabel packetSecond;
     public JLabel upRate;
@@ -28,20 +27,21 @@ public class MainScreenBuilder implements Runnable {
 
     @Override
     public void run() {
-        long startNano = System.nanoTime();
+        MainListener mainListener = new MainListener();
+        long start = System.currentTimeMillis();
         mainFrame = new JFrame("SimaSync Server");
         Box statusBox = Box.createHorizontalBox();
         statusBox.setPreferredSize(new Dimension(380, 0));
         TitledBorder statusBoxBorder = new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Status Panel");
         statusBoxBorder.setTitleFont(statusBoxBorder.getTitleFont().deriveFont(18.0f));
         statusBox.setBorder(statusBoxBorder);
-        {//Fill up status panel
+        {//Fill up Status panel
             Box column1 = Box.createVerticalBox();
             column1.setAlignmentY(Component.TOP_ALIGNMENT);
             Box column2 = Box.createVerticalBox();
             column2.setAlignmentY(Component.TOP_ALIGNMENT);
             //Version
-            createStatusRow(column1, column2, "Version", new JLabel(Constants.VERSION + ", " + Constants.DATA_PACKET_SIZE + " bytes per packet"));
+            createStatusRow(column1, column2, "Version", new JLabel(Constants.VERSION + ", " + Constants.DATA_PACKET_SIZE + " block size"));
             //Connection
             connection = new JLabel("Initializing...");
             createStatusRow(column1, column2, "Connection Status", connection);
@@ -221,7 +221,7 @@ public class MainScreenBuilder implements Runnable {
         mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         mainFrame.pack();
         mainFrame.setVisible(true);//Must be last statement!
-        Instance.log.info("Gui completed (" + ((System.nanoTime() - startNano) / 1000000) + " milli secs)");
+        Instance.log.info("Gui completed (" + (System.currentTimeMillis() - start) + " milli secs)");
     }
 
     private static final float FONT_SIZE = 15f;
