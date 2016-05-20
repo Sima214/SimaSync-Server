@@ -44,6 +44,7 @@ public class DownloadStorage extends AbstractListModel<DownloadElement> {
 
     public void removeElement(int index) {
         synchronized (data) {
+            data.get(index).onRemove();
             data.remove(index);
             updateIndexCache(index, data.size() - 1);
             fireIntervalRemoved(this, index, index);

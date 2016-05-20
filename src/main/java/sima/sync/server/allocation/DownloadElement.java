@@ -5,6 +5,7 @@ import sima.sync.server.hash.Hash;
 import sima.sync.server.hash.MD5Dispatcher;
 import sima.sync.server.swing.Renderer;
 
+import javax.swing.*;
 import java.io.File;
 
 public class DownloadElement {
@@ -18,6 +19,7 @@ public class DownloadElement {
     public int index;
     public float hashBar = 0.0f;
     public float syncBar = 0.0f;
+    public final JPanel container;
     public final Renderer renderer;
     public long lastHashUpdate;
     public Hash hash;
@@ -26,6 +28,7 @@ public class DownloadElement {
         this.file = file;
         this.type = type;
         renderer = new Renderer(this);
+        container = renderer.newContainer();
         if (type == Type.SEND) {
             MD5Dispatcher.addToQueue(this);
         } else {
@@ -42,7 +45,7 @@ public class DownloadElement {
         boolean dupe = false;
         synchronized (Instance.hashStore) {
             if (!Instance.hashStore.add(h)) {
-                dupe = true;//Use booleans so we escape the synchronized statement as soon as possible.
+                dupe = true;//Use booleans so we escape the synchronized block as soon as possible.
             }
         }
         if (dupe) {
@@ -53,6 +56,12 @@ public class DownloadElement {
             lastHashUpdate = System.currentTimeMillis();
             repaint();
             //TODO Inform the networking module.
+        }
+    }
+
+    public void onRemove() {
+        if (hash != null) synchronized (Instance.hashStore) {
+            Instance.hashStore.remove(hash);
         }
     }
 
