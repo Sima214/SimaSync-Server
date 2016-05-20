@@ -68,7 +68,9 @@ public class MainScreenBuilder implements Runnable {
             //Finally...
             statusBox.add(column1);
             statusBox.add(Box.createRigidArea(new Dimension(2, 0)));
-            statusBox.add(new JSeparator(SwingConstants.VERTICAL));
+            JSeparator sep = new JSeparator(SwingConstants.VERTICAL);
+            sep.setMaximumSize(new Dimension(4, Integer.MAX_VALUE));
+            statusBox.add(sep);
             statusBox.add(Box.createRigidArea(new Dimension(2, 0)));
             statusBox.add(column2);
         }

@@ -20,11 +20,15 @@ public class Renderer extends JPanel {
 
     /*package*/
     static class DownloadListRenderer implements ListCellRenderer<DownloadElement> {
+        private static final JLabel INVALID = new JLabel("INVALID");
+
         @Override
         public Component getListCellRendererComponent(JList<? extends DownloadElement> list, DownloadElement value, int index, boolean isSelected, boolean cellHasFocus) {
-            value.renderer.preRender(index, isSelected, cellHasFocus);
-            return value.renderer;
+            if (value != null) {
+                value.renderer.preRender(index, isSelected, cellHasFocus);
+                return value.renderer;
+            }
+            return INVALID;
         }
-
     }
 }

@@ -1,64 +1,67 @@
 package sima.sync.server.allocation;
 
-import sima.sync.server.Instance;
-
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class DownloadStorage extends AbstractListModel<DownloadElement> {
-    private ArrayList<DownloadElement> data = new ArrayList<>();
+    private final ArrayList<DownloadElement> data = new ArrayList<>();
+
 
     @Override
-    public synchronized int getSize() {
-        return data.size();
+    public int getSize() {
+        synchronized (data) {
+            return data.size();
+        }
     }
 
     @Override
-    public synchronized DownloadElement getElementAt(int index) {
-        return data.get(index);
+    public DownloadElement getElementAt(int index) {
+        synchronized (data) {
+            try {
+                return data.get(index);
+            } catch (IndexOutOfBoundsException ignored) {//A hacky workaround. Not a clean solution at all.
+            }
+            return null;
+        }
     }
 
-    public synchronized void addElement(DownloadElement e) {
-        data.add(e);
-        int index = data.size() - 1;
-        e.index = index;
-        fireIntervalAdded(this, index, index);
+    public void addElement(DownloadElement e) {
+        synchronized (data) {
+            data.add(e);
+            int index = data.size() - 1;
+            e.index = index;
+            fireIntervalAdded(this, index, index);
+        }
     }
 
-    public synchronized void addElement(int index, DownloadElement e) {
-        data.add(index, e);
-        updateAllIndexes();
-        fireIntervalAdded(this, index, index);
+    public void addElement(int index, DownloadElement e) {
+        synchronized (data) {
+            data.add(index, e);
+            updateIndexCache(index, data.size() - 1);
+            fireIntervalAdded(this, index, index);
+        }
     }
 
-    public synchronized void removeElement(int index, DownloadElement e) {
-        //Fail safe method, if the index cache becomes out of date.
-        if (data.get(index) == e) {
+    public void removeElement(int index) {
+        synchronized (data) {
             data.remove(index);
-        } else {
-            Instance.log.debug("Detected invalid index cache at removing element.");
-            data.remove(e);
+            updateIndexCache(index, data.size() - 1);
+            fireIntervalRemoved(this, index, index);
         }
-        updateAllIndexes();
-        fireIntervalRemoved(this, index, index);
     }
 
-    public void repaint(int index, DownloadElement e) {
-        //Fail safe method, if the index cache becomes out of date.
-        if (data.get(index) != e) {
-            index = data.indexOf(e);
-            Instance.log.debug("Detected invalid index cache at repaint.");
+    public void repaint(int index) {
+        synchronized (data) {
+            fireContentsChanged(this, index, index);
         }
-        fireContentsChanged(this, index, index);
     }
 
     public void repaintAll() {
-        fireContentsChanged(this, 0, data.size());
+        fireContentsChanged(this, 0, data.size() - 1);
     }
 
-    private void updateAllIndexes() {
-        for (int i = 0; i < data.size(); i++) {
+    private void updateIndexCache(int start, int end) {
+        for (int i = start; i <= end; i++) {
             data.get(i).index = i;
         }
     }

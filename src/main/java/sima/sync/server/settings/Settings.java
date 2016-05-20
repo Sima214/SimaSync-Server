@@ -1,13 +1,15 @@
 package sima.sync.server.settings;
 
-import com.google.gson.Gson;
 import sima.sync.server.Constants;
 import sima.sync.server.Instance;
 
 import java.io.*;
 import java.util.concurrent.locks.LockSupport;
 
+import static sima.sync.server.Instance.gson;
+
 public class Settings {
+
     private String openCurrentDir = System.getProperty("user.home");
     private transient ASyncSave async = new ASyncSave();
     private transient static File cfg = new File(Constants.PATH, "SimaSync-Server.json");
@@ -36,7 +38,6 @@ public class Settings {
     }
 
     public static Settings init() {
-        Gson gson = new Gson();
         if (cfg.exists()) {
             Instance.log.info("Loading saved config file...");
             try (BufferedReader json = new BufferedReader(new FileReader(cfg))) {
@@ -48,7 +49,7 @@ public class Settings {
         } else {
             Instance.log.info("Did not find a config file, so creating a new one...");
             Settings s = new Settings();
-            internalSave(s, gson);
+            internalSave(s);
             return s;
         }
         return null;
@@ -63,7 +64,7 @@ public class Settings {
         }
     }
 
-    private static void internalSave(Settings s, Gson gson) {
+    private static void internalSave(Settings s) {
         synchronized (s.saveLock) {
             Instance.log.debug("Saving settings...");
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(cfg))) {
@@ -96,12 +97,11 @@ public class Settings {
         @SuppressWarnings("InfiniteLoopStatement")
         @Override
         public void run() {
-            Gson gson = new Gson();
             while (loop) {
                 LockSupport.park();
                 if (work) {
                     work = false;
-                    internalSave(Settings.this, gson);
+                    internalSave(Settings.this);
                 }
             }
             Instance.log.info("ASyncSave thread exiting...");

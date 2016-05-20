@@ -1,6 +1,7 @@
 package sima.sync.server.allocation;
 
 import sima.sync.server.Instance;
+import sima.sync.server.hash.Hash;
 import sima.sync.server.hash.MD5Dispatcher;
 import sima.sync.server.swing.Renderer;
 
@@ -19,7 +20,7 @@ public class DownloadElement {
     public float syncBar = 0.0f;
     public final Renderer renderer;
     public long lastHashUpdate;
-    public byte[] hash;
+    public Hash hash;
 
     public DownloadElement(File file, Type type) {
         this.file = file;
@@ -33,14 +34,26 @@ public class DownloadElement {
     }
 
     public void repaint() {
-        Instance.storage.repaint(index, this);
+        Instance.storage.repaint(index);
     }
 
-    public void deliverHash(byte[] digest) {
-        hash = digest;
-        lastHashUpdate = System.currentTimeMillis();
-        Instance.log.info(MD5Dispatcher.genHashHex(hash));
-        repaint();
+    public void deliverHash(Hash h) {
+        boolean firstUpdate = hash == null;
+        boolean dupe = false;
+        synchronized (Instance.hashStore) {
+            if (!Instance.hashStore.add(h)) {
+                dupe = true;//Use booleans so we escape the synchronized statement as soon as possible.
+            }
+        }
+        if (dupe) {
+            Instance.log.info("Removing dupe element: " + file.getName());
+            Instance.storage.removeElement(index);
+        } else {
+            hash = h;
+            lastHashUpdate = System.currentTimeMillis();
+            repaint();
+            //TODO Inform the networking module.
+        }
     }
 
 }

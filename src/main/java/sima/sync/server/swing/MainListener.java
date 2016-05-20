@@ -39,7 +39,7 @@ public class MainListener implements ActionListener {
                         openFiles.setCurrentDirectory(Instance.settings.getOpenCurrentDir());
                         if (openFiles.showOpenDialog(Instance.screen.mainFrame) == JFileChooser.APPROVE_OPTION) {
                             File[] files = openFiles.getSelectedFiles();
-                            for (File cur:files){
+                            for (File cur : files) {
                                 Instance.storage.addElement(new DownloadElement(cur, Type.SEND));
                             }
                         }

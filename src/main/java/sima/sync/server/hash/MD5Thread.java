@@ -31,7 +31,11 @@ public class MD5Thread extends Thread {
         byte[] cache = new byte[1024 * 64];
         MessageDigest digest = generateDigest();
         int lastRead;
+        float curHashBar;
         while (true) try {
+            if (queue.size() == 0) {
+                setSleepingState();
+            }
             DownloadElement job = queue.take();
             File file = job.file;
             setRunningState(file);
@@ -44,15 +48,17 @@ public class MD5Thread extends Thread {
                     if (lastRead > 0) {
                         digest.update(cache, 0, lastRead);
                         position += lastRead;
-                        job.hashBar = (float) (position / fileLength);
-                        job.repaint();
+                        curHashBar = (float) (position / fileLength);
+                        if ((curHashBar - job.hashBar) >= 0.05) {
+                            job.hashBar = curHashBar;
+                            job.repaint();
+                        }
                     }
                 } while (lastRead == cache.length);
             } catch (IOException e) {
                 Instance.log.error(e);
             }
-            job.deliverHash(digest.digest());
-            setSleepingState();
+            job.deliverHash(new Hash(job, digest.digest()));
         } catch (InterruptedException e) {/*Do nothing if interrupted*/}
     }
 
