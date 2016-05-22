@@ -11,7 +11,7 @@ import java.io.File;
 public class DownloadElement {
     public enum Type {RECEIVE, SEND, BOTH}
 
-    public enum Status {PENDING, CONFIRMED}
+    public enum Status {PENDING, CONFIRMED, PAUSED}
 
     public final File file;
     public final Type type;
@@ -31,8 +31,10 @@ public class DownloadElement {
         container = renderer.newContainer();
         if (type == Type.SEND) {
             MD5Dispatcher.addToQueue(this);
-        } else {
+        } else if (type == Type.RECEIVE) {
             status = Status.PENDING;
+        } else {
+            throw new RuntimeException("Invalid DownloadElement.Type in constructor");
         }
     }
 

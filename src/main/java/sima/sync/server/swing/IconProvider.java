@@ -1,8 +1,11 @@
 package sima.sync.server.swing;
 
+import sima.sync.server.Constants;
 import sima.sync.server.Instance;
 
 import javax.swing.*;
+import java.io.File;
+import java.net.MalformedURLException;
 
 public enum IconProvider {
     ACCEPT("accept"),
@@ -11,7 +14,7 @@ public enum IconProvider {
     PAUSE("pause"),
     RESUME("resume");
     final String name;
-    private Icon icon;
+    private ImageIcon icon;
 
     IconProvider(String name) {
         this.name = name;
@@ -22,9 +25,24 @@ public enum IconProvider {
     }
 
     public static void init() {
-        Instance.log.info("Preloading icons...");
+        Instance.log.info("Pre-loading icons...");
+        File parent = new File(Constants.PATH, "icons");
+        if (!parent.isDirectory()) {
+            Instance.log.error("Could not find icon folder. Please check installation");
+            return;
+        }
         for (IconProvider cur : IconProvider.values()) {
-            cur.icon = new ImageIcon("icons/" + cur.name + ".png", cur.name);
+            File iconPath = new File(parent, cur.name + ".png");
+            if (iconPath.isFile()) {
+                Instance.log.info("Loading icon: " + iconPath.getName());
+                try {
+                    cur.icon = new ImageIcon(iconPath.toURI().toURL(), cur.name);
+                } catch (MalformedURLException e) {
+                    Instance.log.error("Could not load icon", e);
+                }
+            } else {
+                Instance.log.error("Could not find icon: " + iconPath.getName());
+            }
         }
     }
 }

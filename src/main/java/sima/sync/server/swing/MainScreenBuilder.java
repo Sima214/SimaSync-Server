@@ -203,11 +203,11 @@ public class MainScreenBuilder implements Runnable {
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setLayoutOrientation(JList.VERTICAL);
         list.setVisibleRowCount(-1);
-        TitledBorder listBorder = new TitledBorder(new LineBorder(new Color(0xE0E0E0), 2, true), "Operations list");
-        listBorder.setTitleFont(listBorder.getTitleFont().deriveFont(20.0f));
-        list.setBorder(listBorder);
+        TitledBorder centerBorder = new TitledBorder(new LineBorder(new Color(0xE0E0E0), 2, true), "Operations list");
+        centerBorder.setTitleFont(centerBorder.getTitleFont().deriveFont(20.0f));
         list.setOpaque(false);
         JScrollPane scroll = new JScrollPane(list);
+        scroll.setBorder(centerBorder);
         //Add everything to the content pane.
         Container contentPane = mainFrame.getContentPane();
         contentPane.add(statusBox, BorderLayout.LINE_END);
